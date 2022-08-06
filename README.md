@@ -150,4 +150,6 @@ End if
 
 to be A-3 compliant, one must embed all fonts**
 
+<img width="562" alt="error" src="https://user-images.githubusercontent.com/1725068/183255689-f2c5f81b-07be-43c9-8ae4-9587b00c2de7.png">
+
 * https://github.com/matteosecli/pdf2archive
