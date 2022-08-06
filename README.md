@@ -150,4 +150,4 @@ End if
 
 to be A-3 compliant, one must embed all fonts**
 
-
+* https://github.com/matteosecli/pdf2archive
