@@ -122,6 +122,12 @@ $PDF:=toPDF("TEST")
 $PDFA:=Folder(Temporary folder; fk platform path).file("TEST.pdf")
 $error:=PDF TO PDFA($PDF.path; $PDFA.path)
 
+/*
+	
+	convert to Factur-X internally using python
+	
+*/
+
 If ($error=0)
 	
 	$output:=Folder(fk desktop folder).file("TEST.pdf")
