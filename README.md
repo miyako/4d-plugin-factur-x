@@ -145,3 +145,9 @@ If ($error=0)
 	
 End if
 ```
+
+## TODO
+
+to be A-3 compliant, one must embed all fonts**
+
+
