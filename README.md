@@ -46,3 +46,9 @@ Use [Python](https://github.com/akretion/factur-x) to embed XML.
 
 * [PyOxidizer](https://github.com/indygreg/PyOxidizer)
 * [PyInstaller](https://pyinstaller.org/en/stable/)
+
+```
+sudo pip3 install --upgrade factur-x
+```
+
+PyPDF4, lxml, factur-x
