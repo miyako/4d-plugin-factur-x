@@ -40,6 +40,14 @@ use **GhostScript** to prepare PDF for archive.
 $error:=PDF TO PDFA($input; $output)
 ```
 
+**Note**: warning message
+
+```
+Use of -dUseCIEColor detected!
+Since the release of version 9.11 of Ghostscript we recommend you do not set
+-dUseCIEColor with the pdfwrite/ps2write device family.
+```
+
 ## Factur-X
 
 *next step is to extract, edit and embed XML in PDF.*
