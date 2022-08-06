@@ -5,6 +5,8 @@ research project
 
 first step is to create a [PDF/A](https://en.wikipedia.org/wiki/PDF/A) document. 
 
+---
+
 1. install OpenJDK 
 
 https://formulae.brew.sh/cask/temurin
@@ -43,3 +45,6 @@ $error:=PDF TO PDFA($input; $output)
 ### Next
 
 Use [Python](https://github.com/akretion/factur-x) to embed XML.
+
+* [PyOxidizer](https://github.com/indygreg/PyOxidizer)
+* [PyInstaller](https://pyinstaller.org/en/stable/)
