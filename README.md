@@ -138,7 +138,7 @@ If ($error=0)
 	$output:=Folder(fk desktop folder).file("TEST.pdf")
 	
 	If ($output.exists)
-		$output.delete()  //library with not overwrite existing file
+		$output.delete()  //library will not overwrite existing file
 	End if 
 	
 	$status:=PDFA SET XML($PDFA.path; $XML.path; $output.path)
