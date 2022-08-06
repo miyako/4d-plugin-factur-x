@@ -5,6 +5,7 @@ research project
 
 *first step is to create a [PDF/A](https://en.wikipedia.org/wiki/PDF/A) document.* 
 
+### Validator
 
 1. install OpenJDK 
 
