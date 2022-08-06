@@ -3,9 +3,8 @@ research project
 
 ## PDF/A
 
-first step is to create a [PDF/A](https://en.wikipedia.org/wiki/PDF/A) document. 
+*first step is to create a [PDF/A](https://en.wikipedia.org/wiki/PDF/A) document.* 
 
----
 
 1. install OpenJDK 
 
