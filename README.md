@@ -40,10 +40,15 @@ use **GhostScript** to add missing elements to PDF.
 $error:=PDF TO PDFA($input; $output)
 ```
 
-### Next
+## Factur-X
 
-Use [Python](https://github.com/akretion/factur-x) to embed XML.
+*next step is to extract, edit and embed XML in PDF.*
 
-modify GS plugin and packge the code found at
+* [akretion/factur-x](https://github.com/akretion/factur-x)
+* [pyinstaller](https://pyinstaller.org/en/stable/)
 
-https://stackoverflow.com/questions/1659147/how-to-use-ghostscript-to-convert-pdf-to-pdf-a-or-pdf-x
+```
+pip3 install --upgrade factur-x 
+pip3 install -U pyinstaller
+```
+
