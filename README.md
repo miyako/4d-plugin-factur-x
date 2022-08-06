@@ -48,7 +48,7 @@ $error:=PDF TO PDFA($input; $output)
 * [pyinstaller](https://pyinstaller.org/en/stable/)
 
 ```
-pip3 install --upgrade factur-x 
+pip3 install -U factur-x 
 pip3 install -U pyinstaller
 ```
 
