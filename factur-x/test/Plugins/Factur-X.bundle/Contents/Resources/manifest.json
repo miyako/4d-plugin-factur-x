@@ -6,6 +6,16 @@
 			"theme": "Factur-X",
 			"syntax": "PDF TO PDFA(&T;&T):L",
 			"threadSafe": true
-		}
+		},
+        {
+            "theme": "Factur-X",
+            "syntax": "PDFA GET XML(&T;&T):J",
+            "threadSafe": true
+        },
+        {
+            "theme": "Factur-X",
+            "syntax": "PDFA SET XML(&T;&T;&T;&C):J",
+            "threadSafe": true
+        }
 	]
 }

@@ -20,8 +20,12 @@
 #include "iapi.h"
 #include "ierrors.h"
 
+#include "4DPlugin-JSON.h"
+
 #pragma mark -
 
 static void PDF_TO_PDFA(PA_PluginParameters params);
+static void PDFA_GET_XML(PA_PluginParameters params);
+static void PDFA_SET_XML(PA_PluginParameters params);
 
 #endif /* PLUGIN_GS_H */

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
-               BuildableName = "GS.bundle"
+               BuildableName = "Factur-X.bundle"
                BlueprintName = "Factur-X"
                ReferencedContainer = "container:Factur-X.xcodeproj">
             </BuildableReference>
@@ -56,7 +56,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
-            BuildableName = "GS.bundle"
+            BuildableName = "Factur-X.bundle"
             BlueprintName = "Factur-X"
             ReferencedContainer = "container:Factur-X.xcodeproj">
          </BuildableReference>

@@ -1,75 +1,49 @@
 {
 	"methods": {
+		"TEST_1_PDF_TO_PDFA": {
+			"timeStamp": "2022-08-06T14:43:45.298Z",
+			"attributes": {
+				"invisible": true
+			}
+		},
+		"InvoiceExample": {
+			"timeStamp": "2022-08-06T15:10:54.371Z",
+			"attributes": {
+				"invisible": true
+			}
+		},
+		"TEST_3_SET_XML": {
+			"timeStamp": "2022-08-06T15:13:19.871Z",
+			"attributes": {
+				"invisible": true
+			}
+		},
+		"lipo": {
+			"timeStamp": "2022-08-06T10:54:44.871Z"
+		},
+		"toXML": {
+			"timeStamp": "2022-08-06T14:36:18.393Z"
+		},
+		"TEST_2_GET_XML": {
+			"timeStamp": "2022-08-06T15:13:30.938Z",
+			"attributes": {
+				"invisible": true
+			}
+		},
+		"TEST_5_PRINT_TO_FACTURX": {
+			"timeStamp": "2022-08-06T15:24:55.570Z",
+			"attributes": {
+				"invisible": true
+			}
+		},
 		"toPDF": {
 			"timeStamp": "2022-08-06T06:47:42.810Z"
 		},
-		"TEST_1": {
-			"timeStamp": "2022-08-06T06:48:31.719Z"
-		},
-		"(generate_file_from_template)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
+		"TEST_4": {
+			"timeStamp": "2022-08-06T15:12:43.237Z",
 			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
+				"invisible": true
 			}
-		},
-		"(generate_project_vs)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(update_manifest_json)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(generate_constants_xlf)": {
-			"timeStamp": "2021-11-29T15:28:10.407Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(generate_project_infoplist)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(generate_project)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z"
-		},
-		"(generate_project_xcode)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(generate_project_plugin_stub)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(generate_project_source)": {
-			"timeStamp": "2021-11-29T15:28:10.408Z",
-			"attributes": {
-				"invisible": true,
-				"preemptive": "capable"
-			}
-		},
-		"(TEST_2)": {
-			"timeStamp": "2021-11-29T15:28:10.407Z"
-		},
-		"(CC)": {
-			"timeStamp": "2021-11-29T15:28:10.407Z"
 		}
 	}
 }

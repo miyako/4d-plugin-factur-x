@@ -23,6 +23,14 @@ void PluginMain(PA_long32 selector, PA_PluginParameters params) {
 			case 1 :
                 PDF_TO_PDFA(params);
 				break;
+                
+            case 2 :
+                PDFA_GET_XML(params);
+                break;
+                
+            case 3 :
+                PDFA_SET_XML(params);
+                break;
 
         }
 
@@ -57,7 +65,254 @@ static void u8_to_u16(std::string& u8, std::wstring& u16) {
 #endif
 }
 
-static void _(std::string& value, gsparam_t *argv) {
+static NSString *pathForCLI(NSString *name) {
+    
+    NSBundle *b = [NSBundle bundleWithIdentifier:@"com.4D.Factur-X"];
+    
+    if(b){
+        
+        return [
+            [
+                [b executablePath]
+                stringByDeletingLastPathComponent
+            ]
+            stringByAppendingPathComponent:name
+        ];
+        
+    }
+    
+    return nil;
+}
+
+#if VERSIONMAC
+static bool waitTaskUntilExitWithTimeout(NSTask *task, CFTimeInterval TO, BOOL SENDTERM, BOOL SENDKILL) {
+    
+    CFAbsoluteTime      started;
+    CFAbsoluteTime      passed;
+    BOOL                exited = NO;
+
+    started = CFAbsoluteTimeGetCurrent();
+    for (
+         CFAbsoluteTime now = started;
+         !exited && ((passed = now - started) < TO);
+         now = CFAbsoluteTimeGetCurrent()
+         )
+    {
+        if (![task isRunning])
+        {
+            exited = YES;
+        } else {
+
+            CFAbsoluteTime sleepTime = 0.1;
+            useconds_t sleepUsec = round(sleepTime * 1000000.0);
+            if (sleepUsec == 0) sleepUsec = 1;
+            PA_YieldAbsolute();
+        }
+    }
+
+    if (!exited)
+    {
+        //NSLog(@"%@ didn't exit after timeout of %0.2f sec", self, TO);
+
+        if (SENDTERM)
+        {
+            TO = 2; // 2 second timeout, waiting for SIGTERM to kill process
+
+            [task terminate];
+
+            started = CFAbsoluteTimeGetCurrent();
+            for (
+                 CFAbsoluteTime now = started;
+                 !exited && ((passed = now - started) < TO);
+                 now = CFAbsoluteTimeGetCurrent()
+                 )
+            {
+                if (![task isRunning])
+                {
+                    exited = YES;
+                } else {
+                    PA_YieldAbsolute();
+                }
+            }
+        }
+
+        if (!exited && SENDKILL)
+        {
+            TO = 2; // 2 second timeout, waiting for SIGKILL to kill process
+
+            pid_t pid = [task processIdentifier];
+            kill(pid, SIGKILL);
+
+            started = CFAbsoluteTimeGetCurrent();
+            for (
+                 CFAbsoluteTime now = started;
+                 !exited && ((passed = now - started) < TO);
+                 now = CFAbsoluteTimeGetCurrent()
+                 )
+            {
+                if (![task isRunning])
+                {
+                    exited = YES;
+                } else {
+                    PA_YieldAbsolute();
+                }
+            }
+        }
+    }
+
+    return exited;
+}
+#endif
+
+static void launchTaskForCLI(NSString *name, PA_ObjectRef returnValue, NSTask *task) {
+    
+    NSString *path = pathForCLI(name);
+    task.launchPath = path;
+    
+    std::string info;
+    bool success = false;
+    int terminationStatus = 0;
+
+    NSPipe *pipe = [NSPipe pipe];
+    NSFileHandle *file = pipe.fileHandleForReading;
+    task.standardError = pipe;
+    
+    /*
+     __block std::string info;
+     __block bool success = false;
+     __block int terminationStatus = 0;
+     
+    task.terminationHandler = ^(NSTask *task){
+
+        NSData *data = [file readDataToEndOfFile];
+        if(data) {
+            NSString *_info = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+            if(_info) {
+                info = [_info UTF8String];
+                [_info release];
+            }
+        }
+        
+        terminationStatus = task.terminationStatus;
+        
+        if(terminationStatus == 0) {
+            success = true;
+        }
+        
+    };
+     */
+    
+    [task launch];
+    
+    waitTaskUntilExitWithTimeout(task, 9, true, true);
+    
+    terminationStatus = task.terminationStatus;
+    
+    NSData *data = [file readDataToEndOfFile];
+    if(data) {
+        NSString *_info = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+        if(_info) {
+            info = [_info UTF8String];
+            [_info release];
+        }
+    }
+    
+    if(terminationStatus == 0) {
+        success = true;
+    }
+    
+    [file closeFile];
+    
+    ob_set_s(returnValue, L"info", info.c_str());
+    ob_set_b(returnValue, L"success", success);
+    ob_set_n(returnValue, L"terminationStatus", terminationStatus);
+}
+
+static void PDFA_SET_XML(PA_PluginParameters params) {
+
+//    sLONG_PTR *pResult = (sLONG_PTR *)params->fResult;
+    PackagePtr pParams = (PackagePtr)params->fParameters;
+    
+    C_TEXT Param1, Param2, Param3;
+    
+    Param1.fromParamAtIndex(pParams, 1);
+    Param2.fromParamAtIndex(pParams, 2);
+    Param3.fromParamAtIndex(pParams, 3);
+    
+    PA_CollectionRef Param4 = PA_GetCollectionParameter(params, 4);
+    
+    PA_ObjectRef returnValue = PA_CreateObject();
+    
+#if VERSIONMAC
+    
+    NSString *inPathPDF, *inPathXML, *outPath;
+    inPathPDF = Param1.copyUTF16String();
+    inPathXML = Param2.copyUTF16String();
+    outPath = Param3.copyUTF16String();
+
+    NSTask *task = [[NSTask alloc]init];
+    NSMutableArray *arguments = [[NSMutableArray alloc]initWithArray:@[inPathPDF, inPathXML, outPath]];
+    
+    PA_long32 count = PA_GetCollectionLength(Param4);
+    for(PA_long32 i = 0; i < count; ++i) {
+        PA_Variable v = PA_GetCollectionElement(Param4, i);
+        if(PA_GetVariableKind(v) == eVK_Unistring) {
+            PA_Unistring u16 = PA_GetStringVariable(v);
+            NSString *s = [[NSString alloc]initWithCharacters:u16.fString length:u16.fLength];;
+            [arguments addObject:s];
+            [s release];
+        }
+    }
+    
+    task.arguments = arguments;
+    
+    launchTaskForCLI(@"facturx-pdfgen", returnValue, task);
+ 
+    [task release];
+    
+    [outPath release];
+    [inPathXML release];
+    [inPathPDF release];
+    
+#endif
+    
+    PA_ReturnObject(params, returnValue);
+}
+
+static void PDFA_GET_XML(PA_PluginParameters params) {
+
+//    sLONG_PTR *pResult = (sLONG_PTR *)params->fResult;
+    PackagePtr pParams = (PackagePtr)params->fParameters;
+    
+    C_TEXT Param1, Param2;
+    
+    Param1.fromParamAtIndex(pParams, 1);
+    Param2.fromParamAtIndex(pParams, 2);
+    
+    PA_ObjectRef returnValue = PA_CreateObject();
+
+#if VERSIONMAC
+
+    NSString *inPath, *outPath;
+    inPath = Param1.copyUTF16String();
+    outPath = Param2.copyUTF16String();
+
+    NSTask *task = [[NSTask alloc]init];
+    task.arguments = @[inPath, outPath];
+    
+    launchTaskForCLI(@"facturx-pdfextractxml", returnValue, task);
+ 
+    [task release];
+    
+    [outPath release];
+    [inPath release];
+    
+#endif
+    
+    PA_ReturnObject(params, returnValue);
+}
+
+static void makeArguments(std::string& value, gsparam_t *argv) {
     
 #if VERSIONMAC
     argv->push_back(value);
@@ -111,7 +366,7 @@ static void PDF_TO_PDFA(PA_PluginParameters params) {
      */
     cli.push_back("-dQUIET");
     
-    cli.push_back("-dPDFA=1");//PDFA-1b
+    cli.push_back("-dPDFA=3");//PDFA-1b
 
     /*
      Set UseCIEColor in the page device dictionary,
@@ -129,7 +384,7 @@ static void PDF_TO_PDFA(PA_PluginParameters params) {
     cli.push_back(inPdf);
     
     for (std::vector<std::string>::iterator it = cli.begin() ; it != cli.end(); ++it) {
-        _(*it, &_gsargv);
+        makeArguments(*it, &_gsargv);
     }
 
     std::vector<char *>gsargv;//just pointers
@@ -155,6 +410,5 @@ static void PDF_TO_PDFA(PA_PluginParameters params) {
         gsapi_delete_instance(minst);
     }
     
-        returnValue.setReturn(pResult);
+    returnValue.setReturn(pResult);
 }
-

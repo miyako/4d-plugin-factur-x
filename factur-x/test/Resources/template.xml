@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!--#4DCODE
+$invoice:=$1
+$ExchangedDocument:=$invoice.ExchangedDocument
+$SupplyChainTradeTransaction:=$invoice.SupplyChainTradeTransaction
+
+$ApplicableHeaderTradeAgreement:=$SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement
+$SellerTradeParty:=$ApplicableHeaderTradeAgreement.SellerTradeParty
+$BuyerTradeParty:=$ApplicableHeaderTradeAgreement.BuyerTradeParty
+
+$ApplicableHeaderTradeDelivery:=$SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery
+$ActualDeliverySupplyChainEvent:=$ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent
+
+$ApplicableHeaderTradeSettlement:=$SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement
+$PaymentTerms:=$ApplicableHeaderTradeSettlement.SpecifiedTradePaymentTerms
+$MonetarySummation:=$ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementHeaderMonetarySummation:
+-->
+<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+    <rsm:ExchangedDocumentContext>
+        <ram:GuidelineSpecifiedDocumentContextParameter>
+            <ram:ID>urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic</ram:ID>
+        </ram:GuidelineSpecifiedDocumentContextParameter>
+    </rsm:ExchangedDocumentContext>
+    <rsm:ExchangedDocument>
+        <ram:ID><!--#4DTEXT $ExchangedDocument.ID--></ram:ID>
+        <ram:TypeCode><!--#4DTEXT $ExchangedDocument.TypeCode--></ram:TypeCode>
+        <ram:IssueDateTime>
+            <udt:DateTimeString format="$4DTEXT($ExchangedDocument.IssueDateTime.DateTimeString.format)"><!--#4DTEXT $ExchangedDocument.IssueDateTime.DateTimeString.value--></udt:DateTimeString>
+        </ram:IssueDateTime>
+        <!--#4DEACH $IncludedNote in $ExchangedDocument.IncludedNote-->
+        <ram:IncludedNote>
+            <ram:Content><!--#4DTEXT $IncludedNote.Content--></ram:Content>
+        </ram:IncludedNote>
+        <!--#4DENDEACH-->
+    </rsm:ExchangedDocument>
+    <rsm:SupplyChainTradeTransaction>
+        <!--#4DEACH $TradeLineItem in $SupplyChainTradeTransaction.IncludedSupplyChainTradeLineItem-->
+        <ram:IncludedSupplyChainTradeLineItem>
+            <ram:AssociatedDocumentLineDocument>
+                <ram:LineID><!--#4DTEXT $TradeLineItem.AssociatedDocumentLineDocument.LineID--></ram:LineID>
+            </ram:AssociatedDocumentLineDocument>
+            <ram:SpecifiedTradeProduct>
+                <ram:GlobalID schemeID="$4DTEXT($TradeLineItem.SpecifiedTradeProduct.GlobalID.schemeID)"><!--#4DTEXT $TradeLineItem.SpecifiedTradeProduct.GlobalID.value--></ram:GlobalID>
+                <ram:Name><!--#4DTEXT $TradeLineItem.SpecifiedTradeProduct.Name--></ram:Name>
+            </ram:SpecifiedTradeProduct>
+            <ram:SpecifiedLineTradeAgreement>
+                <ram:NetPriceProductTradePrice>
+                    <ram:ChargeAmount><!--#4DTEXT $TradeLineItem.SpecifiedLineTradeAgreement.NetPriceProductTradePrice.ChargeAmount--></ram:ChargeAmount>
+                </ram:NetPriceProductTradePrice>
+            </ram:SpecifiedLineTradeAgreement>
+            <ram:SpecifiedLineTradeDelivery>
+                <ram:BilledQuantity unitCode="$4DTEXT($TradeLineItem.SpecifiedLineTradeDelivery.BilledQuantity.unitCode)"><!--#4DTEXT $TradeLineItem.SpecifiedLineTradeDelivery.BilledQuantity.value--></ram:BilledQuantity>
+            </ram:SpecifiedLineTradeDelivery>
+            <ram:SpecifiedLineTradeSettlement>
+                <ram:ApplicableTradeTax>
+                    <ram:TypeCode><!--#4DTEXT $TradeLineItem.SpecifiedLineTradeSettlement.ApplicableTradeTax.TypeCode--></ram:TypeCode>
+                    <ram:CategoryCode><!--#4DTEXT $TradeLineItem.SpecifiedLineTradeSettlement.ApplicableTradeTax.CategoryCode--></ram:CategoryCode>
+                    <ram:RateApplicablePercent><!--#4DTEXT $TradeLineItem.SpecifiedLineTradeSettlement.ApplicableTradeTax.RateApplicablePercent--></ram:RateApplicablePercent>
+                </ram:ApplicableTradeTax>
+                <ram:SpecifiedTradeSettlementLineMonetarySummation>
+                    <ram:LineTotalAmount><!--#4DTEXT $TradeLineItem.SpecifiedLineTradeSettlement.SpecifiedTradeSettlementLineMonetarySummation.LineTotalAmount--></ram:LineTotalAmount>
+                </ram:SpecifiedTradeSettlementLineMonetarySummation>
+            </ram:SpecifiedLineTradeSettlement>
+        </ram:IncludedSupplyChainTradeLineItem>
+        <!--#4DENDEACH-->
+        <ram:ApplicableHeaderTradeAgreement>
+            <ram:SellerTradeParty>
+                <ram:Name><!--#4DTEXT $SellerTradeParty.Name--></ram:Name>
+                <ram:PostalTradeAddress>
+                    <ram:PostcodeCode><!--#4DTEXT $SellerTradeParty.Name--></ram:PostcodeCode>
+                    <ram:LineOne><!--#4DTEXT $SellerTradeParty.PostalTradeAddress.LineOne--></ram:LineOne>
+                    <ram:LineTwo><!--#4DTEXT $SellerTradeParty.PostalTradeAddress.LineTwo--></ram:LineTwo>
+                    <ram:CityName><!--#4DTEXT $SellerTradeParty.PostalTradeAddress.CityName--></ram:CityName>
+                    <ram:CountryID><!--#4DTEXT $SellerTradeParty.PostalTradeAddress.CountryID--></ram:CountryID>
+                </ram:PostalTradeAddress>
+                <!--#4DEACH $SpecifiedTaxRegistration in $SellerTradeParty.SpecifiedTaxRegistration-->
+                <ram:SpecifiedTaxRegistration>
+                    <ram:ID schemeID="$4DTEXT($SpecifiedTaxRegistration.schemeID)"><!--#4DTEXT $SpecifiedTaxRegistration.value--></ram:ID>
+                </ram:SpecifiedTaxRegistration>
+                <!--#4DENDEACH-->
+            </ram:SellerTradeParty>
+            <ram:BuyerTradeParty>
+                <ram:Name><!--#4DTEXT $BuyerTradeParty.Name--></ram:Name>
+                <ram:PostalTradeAddress>
+                    <ram:PostcodeCode><!--#4DTEXT $BuyerTradeParty.PostalTradeAddress.PostcodeCode--></ram:PostcodeCode>
+                    <ram:LineOne><!--#4DTEXT $BuyerTradeParty.PostalTradeAddress.LineOne--></ram:LineOne>
+                    <ram:LineTwo><!--#4DTEXT $BuyerTradeParty.PostalTradeAddress.LineTwo--></ram:LineTwo>
+                    <ram:CityName><!--#4DTEXT $BuyerTradeParty.PostalTradeAddress.CityName--></ram:CityName>
+                    <ram:CountryID><!--#4DTEXT $BuyerTradeParty.PostalTradeAddress.CountryID--></ram:CountryID>
+                </ram:PostalTradeAddress>
+            </ram:BuyerTradeParty>
+        </ram:ApplicableHeaderTradeAgreement>
+        <ram:ApplicableHeaderTradeDelivery>
+            <ram:ActualDeliverySupplyChainEvent>
+                <ram:OccurrenceDateTime>
+                    <udt:DateTimeString format="$4DTEXT($ActualDeliverySupplyChainEvent.OccurrenceDateTime.DateTimeString.format)"><!--#4DTEXT $ActualDeliverySupplyChainEvent.OccurrenceDateTime.DateTimeString.value--></udt:DateTimeString>
+                </ram:OccurrenceDateTime>
+            </ram:ActualDeliverySupplyChainEvent>
+        </ram:ApplicableHeaderTradeDelivery>
+        <ram:ApplicableHeaderTradeSettlement>
+            <ram:InvoiceCurrencyCode><!--#4DTEXT $ApplicableHeaderTradeSettlement.InvoiceCurrencyCode--></ram:InvoiceCurrencyCode>
+            <ram:ApplicableTradeTax>
+                <ram:CalculatedAmount><!--#4DTEXT $ApplicableHeaderTradeSettlement.ApplicableTradeTax.CalculatedAmount--></ram:CalculatedAmount>
+                <ram:TypeCode><!--#4DTEXT $ApplicableHeaderTradeSettlement.ApplicableTradeTax.TypeCode--></ram:TypeCode>
+                <ram:BasisAmount><!--#4DTEXT $ApplicableHeaderTradeSettlement.ApplicableTradeTax.BasisAmount--></ram:BasisAmount>
+                <ram:CategoryCode><!--#4DTEXT $ApplicableHeaderTradeSettlement.ApplicableTradeTax.CategoryCode--></ram:CategoryCode>
+                <ram:RateApplicablePercent><!--#4DTEXT $ApplicableHeaderTradeSettlement.ApplicableTradeTax.RateApplicablePercent--></ram:RateApplicablePercent>
+            </ram:ApplicableTradeTax>
+            <ram:SpecifiedTradePaymentTerms>
+                <ram:DueDateDateTime>
+                    <udt:DateTimeString format="$4DTEXT($PaymentTerms.DueDateDateTime.DateTimeString.format)"><!--#4DTEXT $PaymentTerms.DueDateDateTime.DateTimeString.value--></udt:DateTimeString>
+                </ram:DueDateDateTime>
+            </ram:SpecifiedTradePaymentTerms>
+            <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+                <ram:LineTotalAmount><!--#4DTEXT $MonetarySummation.LineTotalAmount--></ram:LineTotalAmount>
+                <ram:ChargeTotalAmount><!--#4DTEXT $MonetarySummation.ChargeTotalAmount--></ram:ChargeTotalAmount>
+                <ram:AllowanceTotalAmount><!--#4DTEXT $MonetarySummation.AllowanceTotalAmount--></ram:AllowanceTotalAmount>
+                <ram:TaxBasisTotalAmount><!--#4DTEXT $MonetarySummation.TaxBasisTotalAmount--></ram:TaxBasisTotalAmount>
+                <ram:TaxTotalAmount currencyID="$4DTEXT($MonetarySummation.TaxTotalAmount.currencyID)"><!--#4DTEXT $MonetarySummation.TaxTotalAmount.value--></ram:TaxTotalAmount>
+                <ram:GrandTotalAmount><!--#4DTEXT $MonetarySummation.GrandTotalAmount--></ram:GrandTotalAmount>
+                <ram:DuePayableAmount><!--#4DTEXT $MonetarySummation.DuePayableAmount--></ram:DuePayableAmount>
+            </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+        </ram:ApplicableHeaderTradeSettlement>
+    </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>
