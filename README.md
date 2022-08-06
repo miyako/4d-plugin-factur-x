@@ -52,3 +52,10 @@ pip3 install -U factur-x
 pip3 install -U pyinstaller
 ```
 
+```
+cd /opt/homebrew/bin
+pyinstaller facturx-pdfextractxml
+pyinstaller facturx-pdfgen
+pyinstaller facturx-webservice 
+pyinstaller facturx-xmlcheck
+```
