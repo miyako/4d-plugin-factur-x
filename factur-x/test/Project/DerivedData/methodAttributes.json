@@ -1,0 +1,75 @@
+{
+	"methods": {
+		"toPDF": {
+			"timeStamp": "2022-08-06T06:47:42.810Z"
+		},
+		"TEST_1": {
+			"timeStamp": "2022-08-06T06:48:31.719Z"
+		},
+		"(generate_file_from_template)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(generate_project_vs)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(update_manifest_json)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(generate_constants_xlf)": {
+			"timeStamp": "2021-11-29T15:28:10.407Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(generate_project_infoplist)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(generate_project)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z"
+		},
+		"(generate_project_xcode)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(generate_project_plugin_stub)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(generate_project_source)": {
+			"timeStamp": "2021-11-29T15:28:10.408Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"(TEST_2)": {
+			"timeStamp": "2021-11-29T15:28:10.407Z"
+		},
+		"(CC)": {
+			"timeStamp": "2021-11-29T15:28:10.407Z"
+		}
+	}
+}

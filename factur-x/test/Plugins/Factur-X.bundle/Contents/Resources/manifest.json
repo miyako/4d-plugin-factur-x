@@ -1,0 +1,11 @@
+{
+	"name": "Factur-X",
+	"id": 20000,
+	"commands": [
+		{
+			"theme": "Factur-X",
+			"syntax": "PDF TO PDFA(&T;&T):L",
+			"threadSafe": true
+		}
+	]
+}

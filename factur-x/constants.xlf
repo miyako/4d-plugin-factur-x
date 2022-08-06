@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<xliff version="1.0" xmlns:d4="http://www.4d.com/d4-ns">
+    <header>
+        <note>Factur-X</note>
+    </header>
+    <group resname="themes">
+        <trans-unit id="" resname="3B46B0D9A4DA4063899032805C6B49B5" translate="no">
+            <source>Factur-X</source>
+        </trans-unit>
+    </group>
+    <group restype="x-4DK#" d4:groupName="3B46B0D9A4DA4063899032805C6B49B5">
+    </group>
+</xliff>
