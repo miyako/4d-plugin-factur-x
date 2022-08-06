@@ -31,7 +31,7 @@ we are not using any banned features, at the same time, we have no metadata. the
 
 ### PDF→PDF/A
 
-use **GhostScript** to sanitise PDF.
+use **GhostScript** to prepare PDF for archive.
 
 * https://stackoverflow.com/questions/1659147/how-to-use-ghostscript-to-convert-pdf-to-pdf-a-or-pdf-x
 * https://stackoverflow.com/questions/57167784/ghostscript-wont-generate-pdf-a-with-utf16be-text-string-detected-in-docinfo
