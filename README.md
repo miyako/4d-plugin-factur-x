@@ -21,8 +21,6 @@ https://docs.verapdf.org/install/
 
 ### Validate 4D print to PDF
 
-1. print a form using standard 4D printing commands.
-
 **VeraPDF** validation reports failure in 2 domains.
 
 * ISO 19005-1:2005@6.7.2: The document catalog dictionary of a conforming file shall contain the Metadata key.
