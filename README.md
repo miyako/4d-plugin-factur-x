@@ -89,3 +89,53 @@ $status:=PDFA SET XML($inPDF; $inXML; $outPDF{; $attachments})
 a very large plugin. 
 
 contains **python** for Apple Silicon and Intel. contains **factur-x** and all its dependencies. also contains **ghostscript** for Apple Silicon and Intel.
+
+## Examples
+
+```4d
+/*
+	
+	generate electronic invoice data (XML)
+	
+*/
+
+$invoice:=InvoiceExample
+$template:=Folder(fk resources folder).file("template.xml")
+$data:=toXML($invoice; $template)
+$XML:=Folder(Temporary folder; fk platform path).file("data.xml")
+$XML.setText($data)
+
+/*
+	
+	generate PDF using native printing commands (result is not PDF/A)
+	
+*/
+
+$PDF:=toPDF("TEST")
+
+/*
+	
+	convert to PDF/A; internally using ghostscript
+	
+*/
+
+$PDFA:=Folder(Temporary folder; fk platform path).file("TEST.pdf")
+$error:=PDF TO PDFA($PDF.path; $PDFA.path)
+
+If ($error=0)
+	
+	$output:=Folder(fk desktop folder).file("TEST.pdf")
+	
+	If ($output.exists)
+		$output.delete()  //library with not overwrite existing file
+	End if 
+	
+	$status:=PDFA SET XML($PDFA.path; $XML.path; $output.path)
+	$info:=Split string($status.info; "\n")
+	
+	If ($status.success)
+		SHOW ON DISK($output.platformPath)
+	End if 
+	
+End if
+```
