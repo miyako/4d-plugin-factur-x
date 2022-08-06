@@ -76,3 +76,16 @@ pyinstaller facturx-pdfgen
 pyinstaller facturx-webservice 
 pyinstaller facturx-xmlcheck
 ```
+```4d
+$status:=PDFA GET XML($inPDF; $outXML)
+$status:=PDFA SET XML($inPDF; $inXML; $outPDF{; $attachments})
+```
+
+* "GET" internally calls *facturx-pdfextractxml*
+* "SET" internally calls *facturx-pdfgen*
+
+## Distribtution
+
+a very large plugin. 
+
+contains **python** for Apple Silicon and Intel. contains **factur-x** and all its dependencies. also contains **ghostscript** for Apple Silicon and Intel.
