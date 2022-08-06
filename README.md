@@ -19,9 +19,9 @@ brew install --cask temurin
 
 https://docs.verapdf.org/install/
 
-3. print a form using standard 4D printing commands.
+### Validate 4D print to PDF
 
-### Result
+1. print a form using standard 4D printing commands.
 
 **VeraPDF** validation reports failure in 2 domains.
 
