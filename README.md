@@ -146,11 +146,8 @@ If ($error=0)
 End if
 ```
 
-## TODO
+## Validate 
 
-to be A-3 compliant, one must embed all fonts**
+* https://services.fnfe-mpe.org/account/home
 
-<img width="562" alt="error" src="https://user-images.githubusercontent.com/1725068/183255689-f2c5f81b-07be-43c9-8ae4-9587b00c2de7.png">
-
-* https://github.com/matteosecli/pdf2archive
-* https://www.odoo.com/ja_JP/forum/herupu-1/using-ghostscript-to-convert-pdf-invoice-to-pdf-a-3-zugferd-184703
+<img width="561" alt="スクリーンショット 2022-08-07 0 39 55" src="https://user-images.githubusercontent.com/1725068/183255935-10686b54-ec51-4db8-a59a-d1626043aed0.png">
