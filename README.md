@@ -156,3 +156,11 @@ End if
 * https://services.fnfe-mpe.org/account/home
 
 <img width="561" alt="スクリーンショット 2022-08-07 0 39 55" src="https://user-images.githubusercontent.com/1725068/183255935-10686b54-ec51-4db8-a59a-d1626043aed0.png">
+
+## Note for Windows
+
+`pip3 install -U factur-x` might fail because of hard-coded folder separators in [MANIFEST.in](https://github.com/akretion/factur-x/blob/master/MANIFEST.in). download the repo, edit the file and `pip` on a local path.
+
+some XSD files have extra long names.
+
+* https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later
