@@ -1,5 +1,10 @@
+![version](https://img.shields.io/badge/version-19%2B-5682DF)
+![platform](https://img.shields.io/static/v1?label=platform&message=mac-intel%20|%20mac-arm&color=blue)
+[![license](https://img.shields.io/github/license/miyako/4d-plugin-factur-x)](LICENSE)
+![downloads](https://img.shields.io/github/downloads/miyako/4d-plugin-factur-x/total)
+
 # 4d-plugin-factur-x
-research project
+research project; sorry, macOS only!
 
 ## PDF/A
 
@@ -133,7 +138,7 @@ If ($error=0)
 	$output:=Folder(fk desktop folder).file("TEST.pdf")
 	
 	If ($output.exists)
-		$output.delete()  //library with not overwrite existing file
+		$output.delete()  //library will not overwrite existing file
 	End if 
 	
 	$status:=PDFA SET XML($PDFA.path; $XML.path; $output.path)
@@ -151,3 +156,9 @@ End if
 * https://services.fnfe-mpe.org/account/home
 
 <img width="561" alt="スクリーンショット 2022-08-07 0 39 55" src="https://user-images.githubusercontent.com/1725068/183255935-10686b54-ec51-4db8-a59a-d1626043aed0.png">
+
+## Note for Windows
+
+* `pip3 install -U factur-x` might fail because of hard-coded folder separators in [MANIFEST.in](https://github.com/akretion/factur-x/blob/master/MANIFEST.in). download the repo, edit the file and `pip` on a local path.
+
+* some XSD files have extra long names. see [Maximum Path Length Limitation](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later)
