@@ -97,7 +97,7 @@ $status:=PDFA SET XML($inPDF; $inXML; $outPDF{; $attachments})
 
 a very large plugin. 
 
-contains **python** for Apple Silicon and Intel. contains **factur-x** and all its dependencies. also contains **ghostscript** for Apple Silicon and Intel.
+contains **python** for Apple Silicon and Intel and Windows 64-bit. contains **factur-x** and all its dependencies such as **PyPDF4**, **lxml**. also contains **ghostscript** for Apple Silicon and Intel and Windows 64-bit.
 
 ## Examples
 
