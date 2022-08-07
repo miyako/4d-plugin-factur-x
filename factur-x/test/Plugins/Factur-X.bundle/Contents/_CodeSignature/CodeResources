@@ -8,7 +8,7 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			54iscHJIvIFOHbdY5JtRownA2yI=
+			OkWlhTUl5YQ4niarxIoMLJb7kvk=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -1466,7 +1466,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			RdAoeJXOipva9luIadS5MZb7zJqfchTMhPKAsQKAwSQ=
+			gCJID988IFncyzK28rdYwy4BDkSSiO4126l4RJ8iZqw=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -1483,6 +1483,13 @@
 			<key>hash2</key>
 			<data>
 			odmvIRw9T8zi2CzZFy9meQjEszPf3Z5nxKwI+Gf9mUc=
+			</data>
+		</dict>
+		<key>Windows64/Factur-X.4DX</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			0fkNwTNdF0C9EG/btsnxJZCemXOeDwVN3b+Nbk0djFU=
 			</data>
 		</dict>
 		<key>Windows64/GS.4DX</key>
