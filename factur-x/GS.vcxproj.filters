@@ -7,6 +7,8 @@
     <ClCompile Include="4DPlugin-GS.cpp" />
     <ClCompile Include="4D Plugin API\Classes\ARRAY_TEXT.cpp" />
     <ClCompile Include="4D Plugin API\Classes\C_LONGINT.cpp" />
+    <ClCompile Include="support\4DPlugin-JSON.cpp" />
+    <ClCompile Include="4D Plugin API\Classes\C_TEXT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="4D Plugin API\4DPluginAPI.h">
@@ -27,6 +29,8 @@
     <ClInclude Include="4DPlugin-GS.h" />
     <ClInclude Include="4D Plugin API\Classes\C_LONGINT.h" />
     <ClInclude Include="4D Plugin API\Classes\ARRAY_TEXT.h" />
+    <ClInclude Include="support\4DPlugin-JSON.h" />
+    <ClInclude Include="4D Plugin API\Classes\C_TEXT.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="4D Plugin API">

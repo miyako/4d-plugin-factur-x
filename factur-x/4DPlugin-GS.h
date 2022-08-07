@@ -22,6 +22,10 @@
 
 #include "4DPlugin-JSON.h"
 
+#if VERSIONWIN
+#include <time.h>
+#endif
+
 #pragma mark -
 
 static void PDF_TO_PDFA(PA_PluginParameters params);

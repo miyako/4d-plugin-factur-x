@@ -50,17 +50,9 @@ typedef std::vector<std::wstring> gsparam_t;
 #endif
 
 #if VERSIONWIN
-typedef struct
-{
-    HANDLE hThread;
-    HANDLE hProcess;
-    HANDLE hStdInput;
-    HANDLE hStdOutput;
-    HANDLE hStdError;
-}gsctx_t;
-#endif
 
-#if VERSIONWIN
+#define GS_BUFFER_SIZE 4096
+
 static void u8_to_u16(std::string& u8, std::wstring& u16) {
 
 #ifdef _WIN32
@@ -160,18 +152,17 @@ static void launchTaskForCLI(std::wstring& name,
         }
 
         std::vector<wchar_t> buf(32768);
-        PA_Unichar *p = (PA_Unichar *)&buf[0];
+		wchar_t *p = (wchar_t *)&buf[0];
         wchar_t *commandLine = (wchar_t *)p;
         p += arguments.copy((wchar_t *)p, arguments.size());
         
         if(arg4 != NULL) {
-            CUTF16String spc((PA_Unichar *)L" ");
             PA_long32 count = PA_GetCollectionLength(arg4);
             for(PA_long32 i = 0; i < count; ++i) {
                 PA_Variable v = PA_GetCollectionElement(arg4, i);
                 if(PA_GetVariableKind(v) == eVK_Unistring) {
                     PA_Unistring u16 = PA_GetStringVariable(v);
-                    CUTF16String v(u16->fString, u16->fLength);
+					std::wstring v((const wchar_t *)u16.fString, u16.fLength);
                     if(v.size())
                     {
                         std::wstring arg = L" \"";
@@ -186,39 +177,68 @@ static void launchTaskForCLI(std::wstring& name,
             }
         }
 
+		SECURITY_ATTRIBUTES saAttr;
+		saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		saAttr.bInheritHandle = TRUE;
+		saAttr.lpSecurityDescriptor = NULL;
+
+		HANDLE hOut = INVALID_HANDLE_VALUE;
+		HANDLE hRedir = INVALID_HANDLE_VALUE;
+
+		// Create Temp File for redirection
+
+		wchar_t szTempPath[_MAX_PATH];
+		wchar_t szOutput[_MAX_PATH];
+		GetTempPath(_MAX_PATH, szTempPath);
+		GetTempFileName(szTempPath, L"tmp", 0, szOutput);
+
+		hOut = CreateFile(szOutput,
+			GENERIC_WRITE,
+			FILE_SHARE_READ,
+			&saAttr,
+			CREATE_ALWAYS,
+			FILE_ATTRIBUTE_TEMPORARY,
+			0);
+
+		hRedir = CreateFile(szOutput,
+			GENERIC_READ,
+			FILE_SHARE_WRITE,
+			0,
+			OPEN_EXISTING,
+			0,
+			0);
+
         STARTUPINFO si;
-        PROCESS_INFORMATION pi;
         ZeroMemory(&si, sizeof(si));
         si.cb = sizeof(si);
-        si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESTDHANDLES | STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+		if ((hOut != INVALID_HANDLE_VALUE) && (hRedir != INVALID_HANDLE_VALUE)) {
+			si.dwFlags |= STARTF_USESTDHANDLES;
+			si.hStdError = hOut;
+			si.hStdOutput = hOut;
+		}
+        si.dwFlags |=STARTF_USESHOWWINDOW;
         si.wShowWindow = SW_HIDE;
+
+		PROCESS_INFORMATION pi;
         ZeroMemory(&pi, sizeof(pi));
-        
-        gsctx_t ctx;
+
+		std::vector<uint8_t>infobuf(GS_BUFFER_SIZE);
 
         if (CreateProcess(
                           NULL,
                           commandLine,
                           NULL,
                           NULL,
-                          FALSE,
-                          NULL,    //CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT
+                          TRUE,
+                          0,    //CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT
                           NULL,    //pointer to the environment block for the new process
                           currentDirectoryPath.c_str(),
                           &si,
                           &pi
                           ))
-        {
-            ctx.hThread = pi->hThread;
-            ctx.hProcess = pi->hProcess;
-            ctx.hStdInput = si->hStdInput;
-            ctx.hStdOutput = si->hStdOutput;
-            ctx.hStdError = si->hStdError;
-            
-            //wait here
-            
+        {            
             time_t started, passed;
-            BOOL exited = NO;
+            BOOL exited = 0;
             int TO = 9;
             
             started = time(0);
@@ -227,18 +247,18 @@ static void launchTaskForCLI(std::wstring& name,
             for (
                  time_t now = started;
                  !exited && ((passed = now - started) < TO);
-                 now = time(0);
+                 now = time(0)
                  )
             {
                 DWORD exitCode;
-                if (GetExitCodeProcess(ctx.hProcess, &exitCode))
+                if (GetExitCodeProcess(pi.hProcess, &exitCode))
                 {
                     if(exitCode != STILL_ACTIVE)
                     {
-                        exited = YES;
+                        exited = 1;
                     }
                 };
-                
+
                 if (!exited)
                 {
                     time_t now = time(0);
@@ -252,45 +272,42 @@ static void launchTaskForCLI(std::wstring& name,
             }
             
             DWORD exitCode;
-            if (GetExitCodeProcess(ctx.hProcess, &exitCode))
+            if (GetExitCodeProcess(pi.hProcess, &exitCode))
             {
                 if(exitCode == STILL_ACTIVE)
                 {
-                    TerminateProcess(ctx.hProcess, 1);
+                    TerminateProcess(pi.hProcess, 1);
                 }else {
-                    terminationStatus = exitCode;
-                    
-                    DWORD dwRead;
-                    CHAR chBuf[1024];
-                    BOOL bSuccess = FALSE;
 
-                    for (;;)
-                    {
-                        bSuccess = ReadFile(ctx.hStdError, chBuf, 1024, &dwRead, NULL);
-                        if (!bSuccess || dwRead == 0) continue;
-                        
-                        std::wstring u16((const wchar_t *)chBuf, dwRead / sizeof(wchar_t));
-                        std::string u8;
-                        u16_to_u8(u16, u8);
-                        
-                        info += (const uint8_t *u8);
-                        
-                        if (!bSuccess) break;
-                    }
+					for (;;)
+					{
+						ZeroMemory(&infobuf[0], infobuf.size());
+
+						DWORD dwRead;
+						BOOL bSuccess;
+
+						bSuccess = ReadFile(hRedir, &infobuf[0], GS_BUFFER_SIZE - 1, &dwRead, NULL);
+
+						if (!bSuccess || dwRead == 0)
+							break;
+
+						std::string u8((const char *)&infobuf[0], dwRead);
+						info += u8;
+
+					}
+
+                    terminationStatus = exitCode;	
 
                 }
 
             };
 
-            //pi
-            CloseHandle(ctx.hProcess);
-            CloseHandle(ctx.hThread);
-            //si
-            CloseHandle(ctx.hStdInput);
-            CloseHandle(ctx.hStdOutput);
-            CloseHandle(ctx.hStdError);
-            
-            return true;
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+
+			CloseHandle(hOut);
+			CloseHandle(hRedir);
+			DeleteFile(szOutput);
         }
     }
        
@@ -526,8 +543,9 @@ static void PDFA_SET_XML(PA_PluginParameters params) {
     std::wstring inPathPDF = (const wchar_t *)_inPathPDF.c_str();
     std::wstring inPathXML = (const wchar_t *)_inPathXML.c_str();
     std::wstring outPath = (const wchar_t *)_outPath.c_str();
-    
-    launchTaskForCLI(L"facturx-pdfgen", inPath, outPath, outPath, Param4);
+	std::wstring name = L"facturx-pdfgen";
+
+    launchTaskForCLI(name, inPathPDF, inPathXML, outPath, Param4, returnValue);
     
 #endif
     
@@ -568,8 +586,10 @@ static void PDFA_GET_XML(PA_PluginParameters params) {
     Param2.copyUTF16String(&_outPath);
     std::wstring inPath = (const wchar_t *)_inPath.c_str();
     std::wstring outPath = (const wchar_t *)_outPath.c_str();
+	std::wstring path;
+	std::wstring name = L"facturx-pdfextractxml";
 
-    launchTaskForCLI(L"facturx-pdfextractxml", inPath, outPath, L"", NULL);
+    launchTaskForCLI(name, inPath, outPath, path, NULL, returnValue);
     
 #endif
     
@@ -581,7 +601,7 @@ static void makeArguments(std::string& value, gsparam_t *argv) {
 #if VERSIONMAC
     argv->push_back(value);
 #else
-    CUTF16String u16;
+    std::wstring u16;
     u8_to_u16(value, u16);
     argv->push_back(u16);
 #endif
