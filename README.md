@@ -10,7 +10,7 @@ Convert PDF to PDF/A-3. combine XML and PDF to generate Factur-X.
 
 *first step is to create a [PDF/A](https://en.wikipedia.org/wiki/PDF/A) document.*
 
-reason why we need this:
+if you don't care why we need this, jump to [Factur-X](https://github.com/miyako/4d-plugin-factur-x/blob/main/README.md#factur-x)
 
 ### Validator
 
