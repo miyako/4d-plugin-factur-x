@@ -4,6 +4,7 @@
 ![downloads](https://img.shields.io/github/downloads/miyako/4d-plugin-factur-x/total)
 
 # 4d-plugin-factur-x
+Convert PDF to PDF/A-3. combine XML and PDF to generate Factur-X.
 
 ## PDF/A
 
