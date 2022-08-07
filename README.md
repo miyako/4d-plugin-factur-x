@@ -159,8 +159,6 @@ End if
 
 ## Note for Windows
 
-`pip3 install -U factur-x` might fail because of hard-coded folder separators in [MANIFEST.in](https://github.com/akretion/factur-x/blob/master/MANIFEST.in). download the repo, edit the file and `pip` on a local path.
+* `pip3 install -U factur-x` might fail because of hard-coded folder separators in [MANIFEST.in](https://github.com/akretion/factur-x/blob/master/MANIFEST.in). download the repo, edit the file and `pip` on a local path.
 
-some XSD files have extra long names.
-
-* https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later
+* some XSD files have extra long names. see [Maximum Path Length Limitation](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later)
