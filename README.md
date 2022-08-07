@@ -59,6 +59,8 @@ Since the release of version 9.11 of Ghostscript we recommend you do not set
 
 *next step is to extract, edit and embed XML in PDF.*
 
+if you don't care how it works, jump to [Distribution](https://github.com/miyako/4d-plugin-factur-x/blob/main/README.md#distribtution)
+
 * [akretion/factur-x](https://github.com/akretion/factur-x)
 * [pyinstaller](https://pyinstaller.org/en/stable/)
 
