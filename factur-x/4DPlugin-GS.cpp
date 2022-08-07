@@ -49,8 +49,20 @@ typedef std::vector<std::string>  gsparam_t;
 typedef std::vector<std::wstring> gsparam_t;
 #endif
 
+#if VERSIONWIN
+typedef struct
+{
+    HANDLE hThread;
+    HANDLE hProcess;
+    HANDLE hStdInput;
+    HANDLE hStdOutput;
+    HANDLE hStdError;
+}gsctx_t;
+#endif
+
+#if VERSIONWIN
 static void u8_to_u16(std::string& u8, std::wstring& u16) {
-    
+
 #ifdef _WIN32
     int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8.c_str(), u8.length(), NULL, 0);
     
@@ -64,6 +76,236 @@ static void u8_to_u16(std::string& u8, std::wstring& u16) {
     }
 #endif
 }
+
+static void u16_to_u8(std::wstring& u16, std::string& u8) {
+
+#ifdef _WIN32
+    int len = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)u16.c_str(), u16.length(), NULL, 0, NULL, NULL);
+
+    if (len) {
+        std::vector<uint8_t> buf(len + 1);
+        if (WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)u16.c_str(), u16.length(), (LPSTR)&buf[0], len, NULL, NULL)) {
+            u8 = std::string((const char *)&buf[0]);
+        }
+    }
+    else {
+        u8 = std::string((const char *)"");
+    }
+#endif
+}
+
+#endif
+
+#if VERSIONWIN
+
+static void launchTaskForCLI(std::wstring& name,
+                             std::wstring& arg1,
+                             std::wstring& arg2,
+                             std::wstring& arg3,
+                             PA_CollectionRef arg4,
+                             PA_ObjectRef returnValue
+                             ) {
+
+    std::string info;
+    bool success = false;
+    int terminationStatus = -1;
+    
+    wchar_t thisPath[_MAX_PATH] = {0};
+    wchar_t fDrive[_MAX_DRIVE], fDir[_MAX_DIR], fName[_MAX_FNAME], fExt[_MAX_EXT];
+    
+    HMODULE hplugin = GetModuleHandleW(L"Factur-X.4DX");
+    
+    if(hplugin) {
+        
+        GetModuleFileNameW(hplugin, thisPath, _MAX_PATH);
+        _wsplitpath_s(thisPath, fDrive, fDir, fName, fExt);
+        
+        std::wstring path = fDrive;
+        path += fDir;//path to plugin parent folder (windows64)
+        
+        std::wstring currentDirectoryPath = path;
+        
+        path += name;
+        path += L".exe";
+        
+        std::wstring arguments = L"\"";
+        arguments += path;
+        arguments += L"\"";
+        
+        if(arg1.length() != 0) {
+            arguments += L" \"";
+            arguments += arg1;
+            //remove delimiter to avoid open-ended escape sequence
+            if(arguments.at(arguments.size() - 1) == L'\\')
+                arguments = arguments.substr(0, arguments.size() - 1);
+            arguments += L"\"";
+        }
+        
+        if(arg2.length() != 0) {
+            arguments += L" \"";
+            arguments += arg2;
+            //remove delimiter to avoid open-ended escape sequence
+            if(arguments.at(arguments.size() - 1) == L'\\')
+                arguments = arguments.substr(0, arguments.size() - 1);
+            arguments += L"\"";
+        }
+
+        if(arg3.length() != 0) {
+            arguments += L" \"";
+            arguments += arg3;
+            //remove delimiter to avoid open-ended escape sequence
+            if(arguments.at(arguments.size() - 1) == L'\\')
+                arguments = arguments.substr(0, arguments.size() - 1);
+            arguments += L"\"";
+        }
+
+        std::vector<wchar_t> buf(32768);
+        PA_Unichar *p = (PA_Unichar *)&buf[0];
+        wchar_t *commandLine = (wchar_t *)p;
+        p += arguments.copy((wchar_t *)p, arguments.size());
+        
+        if(arg4 != NULL) {
+            CUTF16String spc((PA_Unichar *)L" ");
+            PA_long32 count = PA_GetCollectionLength(arg4);
+            for(PA_long32 i = 0; i < count; ++i) {
+                PA_Variable v = PA_GetCollectionElement(arg4, i);
+                if(PA_GetVariableKind(v) == eVK_Unistring) {
+                    PA_Unistring u16 = PA_GetStringVariable(v);
+                    CUTF16String v(u16->fString, u16->fLength);
+                    if(v.size())
+                    {
+                        std::wstring arg = L" \"";
+                        arg += v;
+                        //remove delimiter to avoid open-ended escape sequence
+                        if(arg.at(arg.size() - 1) == L'\\')
+                            arg = arg.substr(0, arg.size() - 1);
+                        arg += L"\"";
+                        p += arg.copy(p, arg.size());
+                    }
+                }
+            }
+        }
+
+        STARTUPINFO si;
+        PROCESS_INFORMATION pi;
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESTDHANDLES | STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+        si.wShowWindow = SW_HIDE;
+        ZeroMemory(&pi, sizeof(pi));
+        
+        gsctx_t ctx;
+
+        if (CreateProcess(
+                          NULL,
+                          commandLine,
+                          NULL,
+                          NULL,
+                          FALSE,
+                          NULL,    //CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT
+                          NULL,    //pointer to the environment block for the new process
+                          currentDirectoryPath.c_str(),
+                          &si,
+                          &pi
+                          ))
+        {
+            ctx.hThread = pi->hThread;
+            ctx.hProcess = pi->hProcess;
+            ctx.hStdInput = si->hStdInput;
+            ctx.hStdOutput = si->hStdOutput;
+            ctx.hStdError = si->hStdError;
+            
+            //wait here
+            
+            time_t started, passed;
+            BOOL exited = NO;
+            int TO = 9;
+            
+            started = time(0);
+            time_t startTime = started;
+            
+            for (
+                 time_t now = started;
+                 !exited && ((passed = now - started) < TO);
+                 now = time(0);
+                 )
+            {
+                DWORD exitCode;
+                if (GetExitCodeProcess(ctx.hProcess, &exitCode))
+                {
+                    if(exitCode != STILL_ACTIVE)
+                    {
+                        exited = YES;
+                    }
+                };
+                
+                if (!exited)
+                {
+                    time_t now = time(0);
+                    time_t elapsedTime = abs(startTime - now);
+                    if (elapsedTime > 0)
+                    {
+                        startTime = now;
+                        PA_YieldAbsolute();
+                    }
+                }
+            }
+            
+            DWORD exitCode;
+            if (GetExitCodeProcess(ctx.hProcess, &exitCode))
+            {
+                if(exitCode == STILL_ACTIVE)
+                {
+                    TerminateProcess(ctx.hProcess, 1);
+                }else {
+                    terminationStatus = exitCode;
+                    
+                    DWORD dwRead;
+                    CHAR chBuf[1024];
+                    BOOL bSuccess = FALSE;
+
+                    for (;;)
+                    {
+                        bSuccess = ReadFile(ctx.hStdError, chBuf, 1024, &dwRead, NULL);
+                        if (!bSuccess || dwRead == 0) continue;
+                        
+                        std::wstring u16((const wchar_t *)chBuf, dwRead / sizeof(wchar_t));
+                        std::string u8;
+                        u16_to_u8(u16, u8);
+                        
+                        info += (const uint8_t *u8);
+                        
+                        if (!bSuccess) break;
+                    }
+
+                }
+
+            };
+
+            //pi
+            CloseHandle(ctx.hProcess);
+            CloseHandle(ctx.hThread);
+            //si
+            CloseHandle(ctx.hStdInput);
+            CloseHandle(ctx.hStdOutput);
+            CloseHandle(ctx.hStdError);
+            
+            return true;
+        }
+    }
+       
+    if(terminationStatus == 0) {
+        success = true;
+    }
+    
+    ob_set_s(returnValue, L"info", info.c_str());
+    ob_set_b(returnValue, L"success", success);
+    ob_set_n(returnValue, L"terminationStatus", terminationStatus);
+}
+
+#endif
+
+#if VERSIONMAC
 
 static NSString *pathForCLI(NSString *name) {
     
@@ -84,7 +326,6 @@ static NSString *pathForCLI(NSString *name) {
     return nil;
 }
 
-#if VERSIONMAC
 static bool waitTaskUntilExitWithTimeout(NSTask *task, CFTimeInterval TO, BOOL SENDTERM, BOOL SENDKILL) {
     
     CFAbsoluteTime      started;
@@ -162,7 +403,6 @@ static bool waitTaskUntilExitWithTimeout(NSTask *task, CFTimeInterval TO, BOOL S
 
     return exited;
 }
-#endif
 
 static void launchTaskForCLI(NSString *name, PA_ObjectRef returnValue, NSTask *task) {
     
@@ -171,11 +411,13 @@ static void launchTaskForCLI(NSString *name, PA_ObjectRef returnValue, NSTask *t
     
     std::string info;
     bool success = false;
-    int terminationStatus = 0;
+    int terminationStatus = -1;
 
     NSPipe *pipe = [NSPipe pipe];
     NSFileHandle *file = pipe.fileHandleForReading;
     task.standardError = pipe;
+    
+    //this crashed 4D!
     
     /*
      __block std::string info;
@@ -228,9 +470,10 @@ static void launchTaskForCLI(NSString *name, PA_ObjectRef returnValue, NSTask *t
     ob_set_n(returnValue, L"terminationStatus", terminationStatus);
 }
 
+#endif
+
 static void PDFA_SET_XML(PA_PluginParameters params) {
 
-//    sLONG_PTR *pResult = (sLONG_PTR *)params->fResult;
     PackagePtr pParams = (PackagePtr)params->fParameters;
     
     C_TEXT Param1, Param2, Param3;
@@ -274,6 +517,18 @@ static void PDFA_SET_XML(PA_PluginParameters params) {
     [inPathXML release];
     [inPathPDF release];
     
+#else
+    
+    CUTF16String _inPathPDF, _inPathXML, _outPath;
+    Param1.copyUTF16String(&_inPathPDF);
+    Param2.copyUTF16String(&_inPathXML);
+    Param3.copyUTF16String(&_outPath);
+    std::wstring inPathPDF = (const wchar_t *)_inPathPDF.c_str();
+    std::wstring inPathXML = (const wchar_t *)_inPathXML.c_str();
+    std::wstring outPath = (const wchar_t *)_outPath.c_str();
+    
+    launchTaskForCLI(L"facturx-pdfgen", inPath, outPath, outPath, Param4);
+    
 #endif
     
     PA_ReturnObject(params, returnValue);
@@ -281,7 +536,6 @@ static void PDFA_SET_XML(PA_PluginParameters params) {
 
 static void PDFA_GET_XML(PA_PluginParameters params) {
 
-//    sLONG_PTR *pResult = (sLONG_PTR *)params->fResult;
     PackagePtr pParams = (PackagePtr)params->fParameters;
     
     C_TEXT Param1, Param2;
@@ -306,6 +560,16 @@ static void PDFA_GET_XML(PA_PluginParameters params) {
     
     [outPath release];
     [inPath release];
+
+#else
+    
+    CUTF16String _inPath, _outPath;
+    Param1.copyUTF16String(&_inPath);
+    Param2.copyUTF16String(&_outPath);
+    std::wstring inPath = (const wchar_t *)_inPath.c_str();
+    std::wstring outPath = (const wchar_t *)_outPath.c_str();
+
+    launchTaskForCLI(L"facturx-pdfextractxml", inPath, outPath, L"", NULL);
     
 #endif
     
@@ -366,7 +630,7 @@ static void PDF_TO_PDFA(PA_PluginParameters params) {
      */
     cli.push_back("-dQUIET");
     
-    cli.push_back("-dPDFA=3");//PDFA-1b
+    cli.push_back("-dPDFA=3");
 
     /*
      Set UseCIEColor in the page device dictionary,
