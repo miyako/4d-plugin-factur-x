@@ -156,6 +156,7 @@
       <xs:element name="LineThree" type="udt:TextType" minOccurs="0"/>
       <xs:element name="CityName" type="udt:TextType" minOccurs="0"/>
       <xs:element name="CountryID" type="qdt:CountryIDType"/>
+      <xs:element name="CountrySubDivisionName" type="udt:TextType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="TradeAllowanceChargeType">
