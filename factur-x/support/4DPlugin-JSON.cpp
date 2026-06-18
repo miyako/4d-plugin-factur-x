@@ -5,7 +5,12 @@ void json_wconv(const wchar_t *value, CUTF16String *u16) {
     size_t wlen = wcslen(value);
     
 #if VERSIONWIN
-    *u16 = CUTF16String((const PA_Unichar *)value, wlen);
+    // Copy into a sized buffer so CUTF16String receives a properly null-terminated block
+    // regardless of how the constructor handles the raw wchar_t pointer.
+    std::vector<PA_Unichar> buf(wlen + 1);
+    memcpy(buf.data(), value, wlen * sizeof(PA_Unichar));
+    buf[wlen] = 0;
+    *u16 = CUTF16String(buf.data(), wlen);
 #else
     CFStringRef str = CFStringCreateWithBytes(kCFAllocatorDefault, (const UInt8 *)value, wlen*sizeof(wchar_t), kCFStringEncodingUTF32LE, true);
     if(str)
@@ -51,7 +56,7 @@ void ob_set_s(PA_ObjectRef obj, const char *_key, const char *_value) {
         int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), NULL, 0);
         if(len){
             std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
-            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len)){
+            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len + 1)){
                 u16k = CUTF16String((const PA_Unichar *)&buf[0]);
             }
         }
@@ -59,7 +64,7 @@ void ob_set_s(PA_ObjectRef obj, const char *_key, const char *_value) {
         len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8v.c_str(), u8v.length(), NULL, 0);
         if(len){
             std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
-            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8v.c_str(), u8v.length(), (LPWSTR)&buf[0], len)){
+            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8v.c_str(), u8v.length(), (LPWSTR)&buf[0], len + 1)){
                 u16v = CUTF16String((const PA_Unichar *)&buf[0]);
             }
         }
@@ -116,7 +121,7 @@ void ob_set_s(PA_ObjectRef obj, const wchar_t *_key, const char *_value) {
             
             if(len){
                 std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
-                if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8.c_str(), u8.length(), (LPWSTR)&buf[0], len)){
+                if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8.c_str(), u8.length(), (LPWSTR)&buf[0], len + 1)){
                     u16 = CUTF16String((const PA_Unichar *)&buf[0]);
                 }
             }else{
@@ -220,7 +225,7 @@ void ob_set_o(PA_ObjectRef obj, const char *_key, PA_ObjectRef value) {
         int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), NULL, 0);
         if(len){
             std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
-            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len)){
+            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len + 1)){
                 u16k = CUTF16String((const PA_Unichar *)&buf[0]);
             }
         }
@@ -249,6 +254,47 @@ void ob_set_o(PA_ObjectRef obj, const char *_key, PA_ObjectRef value) {
         
     }
     
+}
+
+void ob_set_c(PA_ObjectRef obj, const char *_key, PA_CollectionRef value) {
+    
+    if(obj)
+    {
+        CUTF8String u8k = CUTF8String((const uint8_t *)_key);
+        
+        CUTF16String u16k;
+                
+#ifdef _WIN32
+        int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), NULL, 0);
+        if(len){
+            std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
+            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len + 1)){
+                u16k = CUTF16String((const PA_Unichar *)&buf[0]);
+            }
+        }
+#else
+        CFStringRef str = CFStringCreateWithBytes(kCFAllocatorDefault, u8k.c_str(), u8k.length(), kCFStringEncodingUTF8, true);
+        if(str){
+            CFIndex len = CFStringGetLength(str);
+            std::vector<uint8_t> buf((len+1) * sizeof(PA_Unichar));
+            CFStringGetCharacters(str, CFRangeMake(0, len), (UniChar *)&buf[0]);
+            u16k = CUTF16String((const PA_Unichar *)&buf[0]);
+            CFRelease(str);
+        }
+#endif
+    
+        if(value)
+        {
+            PA_Variable v = PA_CreateVariable(eVK_Collection);
+            PA_Unistring key = PA_CreateUnistring((PA_Unichar *)u16k.c_str());
+            
+            PA_SetCollectionVariable(&v, value);
+            PA_SetObjectProperty(obj, &key, v);
+            
+            PA_DisposeUnistring(&key);
+            PA_ClearVariable(&v);
+        }
+    }
 }
 
 void ob_set_c(PA_ObjectRef obj, const wchar_t *_key, PA_CollectionRef value) {
@@ -315,7 +361,7 @@ void ob_set_n(PA_ObjectRef obj, const char *_key, double value) {
         int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), NULL, 0);
         if(len){
             std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
-            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len)){
+            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len + 1)){
                 u16k = CUTF16String((const PA_Unichar *)&buf[0]);
             }
         }
@@ -341,6 +387,25 @@ void ob_set_n(PA_ObjectRef obj, const char *_key, double value) {
     }
 }
 
+typedef struct {
+    PA_ObjectRef obj;
+    const char *_key;
+    double value;
+} ob_set_n_params_t;
+
+static void _ob_set_n(ob_set_n_params_t *p) {
+    ob_set_n(p->obj, p->_key, p->value);
+}
+
+static void mp_ob_set_n(PA_ObjectRef obj, const char *_key, double value) {
+    ob_set_n_params_t p;
+    p.obj = obj;
+    p._key = _key;
+    p.value = value;
+    
+    PA_RunInMainProcess((PA_RunInMainProcessProcPtr)_ob_set_n, &p);
+}
+
 void ob_set_0(PA_ObjectRef obj, const char *_key) {
     
     if(obj)
@@ -352,7 +417,7 @@ void ob_set_0(PA_ObjectRef obj, const char *_key) {
         int len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), NULL, 0);
         if(len){
             std::vector<uint8_t> buf((len + 1) * sizeof(PA_Unichar));
-            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len)){
+            if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)u8k.c_str(), u8k.length(), (LPWSTR)&buf[0], len + 1)){
                 u16k = CUTF16String((const PA_Unichar *)&buf[0]);
             }
         }
@@ -441,9 +506,11 @@ bool ob_get_s(PA_ObjectRef obj, const wchar_t *_key, CUTF8String *value) {
         
         if(is_defined)
         {
+            is_defined = false;
             PA_Variable v = PA_GetObjectProperty(obj, &key);
             if(PA_GetVariableKind(v) == eVK_Unistring)
             {
+                is_defined = true;
                 PA_Unistring uvalue = PA_GetStringVariable(v);
                 
                 CUTF16String u = CUTF16String(uvalue.fString, uvalue.fLength);
@@ -452,7 +519,7 @@ bool ob_get_s(PA_ObjectRef obj, const wchar_t *_key, CUTF8String *value) {
                 
                 if(len){
                     std::vector<uint8_t> buf(len + 1);
-                    if(WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)u.c_str(), u.length(), (LPSTR)&buf[0], len, NULL, NULL)){
+                    if(WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)u.c_str(), u.length(), (LPSTR)&buf[0], len + 1, NULL, NULL)){
                         *value = CUTF8String((const uint8_t *)&buf[0]);
                     }
                 }else{
@@ -501,9 +568,11 @@ bool ob_get_a(PA_ObjectRef obj, const wchar_t *_key, CUTF16String *value) {
         
         if(is_defined)
         {
+            is_defined = false;
             PA_Variable v = PA_GetObjectProperty(obj, &key);
             if(PA_GetVariableKind(v) == eVK_Unistring)
             {
+                is_defined = true;
                 PA_Unistring uvalue = PA_GetStringVariable(v);
                 *value = CUTF16String(uvalue.fString, uvalue.fLength);
             }
@@ -512,6 +581,35 @@ bool ob_get_a(PA_ObjectRef obj, const wchar_t *_key, CUTF16String *value) {
         PA_DisposeUnistring(&key);
     }
     
+    return is_defined;
+}
+
+bool ob_get_d(PA_ObjectRef obj, const wchar_t *_key, short *dd, short *mm, short *yyyy) {
+
+    bool is_defined = false;
+
+    if (obj)
+    {
+        CUTF16String ukey;
+        json_wconv(_key, &ukey);
+        PA_Unistring key = PA_CreateUnistring((PA_Unichar *)ukey.c_str());
+        is_defined = PA_HasObjectProperty(obj, &key);
+
+        if (is_defined)
+        {
+            is_defined = false;
+
+            PA_Variable v = PA_GetObjectProperty(obj, &key);
+            if (PA_GetVariableKind(v) == eVK_Date)
+            {
+                is_defined = true;
+                PA_GetDateVariable(v, dd, mm, yyyy);
+            }
+        }
+
+        PA_DisposeUnistring(&key);
+    }
+
     return is_defined;
 }
 
@@ -563,6 +661,24 @@ double ob_get_n(PA_ObjectRef obj, const wchar_t *_key) {
     }
     
     return value;
+}
+
+typedef struct {
+    PA_ObjectRef obj;
+    const wchar_t *_key;
+    double value;
+} ob_get_n_params_t;
+
+static void _ob_get_n(ob_get_n_params_t *p) {
+    p->value = ob_get_n(p->obj, p->_key);
+}
+
+static double mp_ob_get_n(PA_ObjectRef obj, const wchar_t *_key) {
+    ob_get_n_params_t p;
+    p.obj = obj;
+    p._key = _key;
+    PA_RunInMainProcess((PA_RunInMainProcessProcPtr)_ob_get_n, &p);
+    return p.value;
 }
 
 PA_ObjectRef ob_get_o(PA_ObjectRef obj, const wchar_t *_key) {
@@ -628,7 +744,7 @@ void ob_stringify(PA_ObjectRef obj, CUTF8String *value) {
     
     if(len){
         std::vector<uint8_t> buf(len + 1);
-        if(WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)ujson.fString, ujson.fLength, (LPSTR)&buf[0], len, NULL, NULL)){
+        if(WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)ujson.fString, ujson.fLength, (LPSTR)&buf[0], len + 1, NULL, NULL)){
             *value = CUTF8String((const uint8_t *)&buf[0]);
         }
     }else{
